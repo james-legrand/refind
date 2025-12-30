@@ -1,10 +1,10 @@
 /*
- * Searchlight - Background script to store settings and most recent search.
+ * ReFind - Background script to store settings and most recent search.
  */ 
-console.log('[Searchlight] Background script loaded');
+console.log('[ReFind] Background script loaded');
 
 
-// Default to a vanilla search
+// Default to standard search
 const DEFAULTS = { caseSensitive: false, useRegex: false };
 
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => {

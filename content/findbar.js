@@ -1,13 +1,13 @@
 /*
- * Searchlight - Script to perform searching and highlighting.
+ * ReFind - Script to perform searching and highlighting.
  */ 
 (function () {
     'use strict';
 
     // Prevent double loading
-    if (window.__searchlightLoaded) return;
-    window.__searchlightLoaded = true;
-    console.log('[Searchlight] Initializing...');
+    if (window.__refindLoaded) return;
+    window.__refindLoaded = true;
+    console.log('[ReFind] Initializing...');
 
     // State
     let findBar = null;
@@ -23,9 +23,9 @@
     // === KEYBOARD HANDLING ===
 
     function handleKeyDown(e) {
-        const isCtrlF = (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f';
+        const isCtrlShiftF = (e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'f';
         
-        if (isCtrlF) {
+        if (isCtrlShiftF) {
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
@@ -48,23 +48,23 @@
 
     function createFindBar() {
         const bar = document.createElement('div');
-        bar.id = 'searchlight-findbar';
+        bar.id = 'refind-findbar';
         
         bar.innerHTML = `
             <div class="findbar-container">
                 <div class="findbar-input-container">
-                    <input type="text" id="searchlight-findbar-input" class="findbar-textbox"
+                    <input type="text" id="refind-findbar-input" class="findbar-textbox"
                            placeholder="Find in page" autocomplete="off" spellcheck="false" />
-                    <span id="searchlight-findbar-status" class="findbar-status"></span>
+                    <span id="refind-findbar-status" class="findbar-status"></span>
                 </div>
                 
                 <div class="findbar-buttons">
-                    <button id="searchlight-findbar-prev" class="findbar-button" title="Previous (Shift+Enter)">
+                    <button id="refind-findbar-prev" class="findbar-button" title="Previous (Shift+Enter)">
                         <svg viewBox="0 0 16 16" width="16" height="16">
                             <path d="M8 4l4 4H4z" fill="currentColor"/>
                         </svg>
                     </button>
-                    <button id="searchlight-findbar-next" class="findbar-button" title="Next (Enter)">
+                    <button id="refind-findbar-next" class="findbar-button" title="Next (Enter)">
                         <svg viewBox="0 0 16 16" width="16" height="16">
                             <path d="M8 12l4-4H4z" fill="currentColor"/>
                         </svg>
@@ -75,25 +75,25 @@
                 
                 <div class="findbar-options">
                     <label class="findbar-checkbox-label" title="Match Case">
-                        <input type="checkbox" id="searchlight-findbar-case" />
+                        <input type="checkbox" id="refind-findbar-case" />
                         <span>Match Case</span>
                     </label>
                     <label class="findbar-checkbox-label" title="Regular Expression">
-                        <input type="checkbox" id="searchlight-findbar-regex" />
+                        <input type="checkbox" id="refind-findbar-regex" />
                         <span>Regex</span>
                     </label>
                     <div class="findbar-proximity-group">
                         <label class="findbar-checkbox-label" title="Proximity Search - find words within N characters of each other">
-                            <input type="checkbox" id="searchlight-findbar-proximity" />
+                            <input type="checkbox" id="refind-findbar-proximity" />
                             <span>Proximity</span>
                         </label>
-                        <input type="number" id="searchlight-findbar-proximity-value" 
+                        <input type="number" id="refind-findbar-proximity-value" 
                                class="findbar-proximity-input" value="150" min="1" max="10000" disabled 
                                title="Maximum character distance between words" />
                     </div>
                 </div>
                 
-                <button id="searchlight-findbar-close" class="findbar-button findbar-close" title="Close (Esc)">
+                <button id="refind-findbar-close" class="findbar-button findbar-close" title="Close (Esc)">
                     <svg viewBox="0 0 16 16" width="16" height="16">
                         <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" fill="none"/>
                     </svg>
@@ -107,11 +107,11 @@
     }
 
     function setupEventListeners(bar) {
-        const input = bar.querySelector('#searchlight-findbar-input');
-        const caseCheckbox = bar.querySelector('#searchlight-findbar-case');
-        const regexCheckbox = bar.querySelector('#searchlight-findbar-regex');
-        const proximityCheckbox = bar.querySelector('#searchlight-findbar-proximity');
-        const proximityInput = bar.querySelector('#searchlight-findbar-proximity-value');
+        const input = bar.querySelector('#refind-findbar-input');
+        const caseCheckbox = bar.querySelector('#refind-findbar-case');
+        const regexCheckbox = bar.querySelector('#refind-findbar-regex');
+        const proximityCheckbox = bar.querySelector('#refind-findbar-proximity');
+        const proximityInput = bar.querySelector('#refind-findbar-proximity-value');
         
         // Search as user types (debounced)
         let typingTimer;
@@ -133,9 +133,9 @@
             e.stopPropagation();
         });
         
-        // Ctrl+F while focused just selects all
+        // Ctrl+Shift+F while focused just selects all
         input.addEventListener('keydown', (e) => {
-            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'f') {
                 e.preventDefault();
                 e.stopPropagation();
                 input.select();
@@ -143,9 +143,9 @@
         }, true);
         
         // Buttons
-        bar.querySelector('#searchlight-findbar-prev').addEventListener('click', goToPreviousMatch);
-        bar.querySelector('#searchlight-findbar-next').addEventListener('click', goToNextMatch);
-        bar.querySelector('#searchlight-findbar-close').addEventListener('click', hideFindBar);
+        bar.querySelector('#refind-findbar-prev').addEventListener('click', goToPreviousMatch);
+        bar.querySelector('#refind-findbar-next').addEventListener('click', goToNextMatch);
+        bar.querySelector('#refind-findbar-close').addEventListener('click', hideFindBar);
         
         // Case sensitivity checkbox
         caseCheckbox.addEventListener('change', () => {
@@ -206,7 +206,7 @@
         findBar.classList.add('visible');
         isVisible = true;
         
-        const input = findBar.querySelector('#searchlight-findbar-input');
+        const input = findBar.querySelector('#refind-findbar-input');
         
         // Use selected text as search term if any
         const selection = window.getSelection();
@@ -220,7 +220,7 @@
             if (input.value) performSearch(input.value);
         }, 10);
         
-        console.log('[Searchlight] Opened');
+        console.log('[ReFind] Opened');
     }
 
     function hideFindBar() {
@@ -229,7 +229,7 @@
         isVisible = false;
         clearHighlights();
         updateStatus('');
-        console.log('[Searchlight] Closed');
+        console.log('[ReFind] Closed');
     }
 
 
@@ -243,7 +243,7 @@
             return;
         }
         
-        console.log('[Searchlight] Searching for:', searchTerm, 'Proximity:', settings.useProximity);
+        console.log('[ReFind] Searching for:', searchTerm, 'Proximity:', settings.useProximity);
         
         let totalMatches = 0;
         
@@ -275,7 +275,7 @@
             }
         }
         
-        highlights = Array.from(document.querySelectorAll('.searchlight-highlight'));
+        highlights = Array.from(document.querySelectorAll('.refind-highlight'));
         
         if (totalMatches > 0) {
             currentIndex = 0;
@@ -285,7 +285,7 @@
             updateStatus('No matches', true);
         }
         
-        console.log('[Searchlight] Found', totalMatches, 'matches');
+        console.log('[ReFind] Found', totalMatches, 'matches');
     }
 
     function performProximitySearch(searchTerm) {
@@ -446,7 +446,7 @@
         
         const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
             acceptNode: (node) => {
-                if (node.parentElement?.closest('#searchlight-findbar')) return NodeFilter.FILTER_REJECT;
+                if (node.parentElement?.closest('#refind-findbar')) return NodeFilter.FILTER_REJECT;
                 
                 const parent = node.parentElement;
                 if (!parent) return NodeFilter.FILTER_REJECT;
@@ -485,7 +485,7 @@
             }
             // Highlighted match
             const mark = document.createElement('mark');
-            mark.className = 'searchlight-highlight';
+            mark.className = 'refind-highlight';
             mark.textContent = match.text || text.slice(match.start, match.start + match.length);
             fragment.appendChild(mark);
             lastEnd = match.start + match.length;
@@ -500,7 +500,7 @@
     }
 
     function clearHighlights() {
-        for (const mark of document.querySelectorAll('.searchlight-highlight')) {
+        for (const mark of document.querySelectorAll('.refind-highlight')) {
             const parent = mark.parentNode;
             parent.replaceChild(document.createTextNode(mark.textContent), mark);
             parent.normalize();
@@ -540,7 +540,7 @@
     // === STATUS ===
 
     function updateStatus(text, isError = false) {
-        const status = document.querySelector('#searchlight-findbar-status');
+        const status = document.querySelector('#refind-findbar-status');
         if (status) {
             status.textContent = text;
             status.classList.toggle('error', isError);
@@ -554,10 +554,10 @@
         browser.runtime.sendMessage({ action: 'getSettings' })
             .then(stored => {
                 settings = { ...settings, ...stored };
-                const caseCheckbox = document.querySelector('#searchlight-findbar-case');
-                const regexCheckbox = document.querySelector('#searchlight-findbar-regex');
-                const proximityCheckbox = document.querySelector('#searchlight-findbar-proximity');
-                const proximityInput = document.querySelector('#searchlight-findbar-proximity-value');
+                const caseCheckbox = document.querySelector('#refind-findbar-case');
+                const regexCheckbox = document.querySelector('#refind-findbar-regex');
+                const proximityCheckbox = document.querySelector('#refind-findbar-proximity');
+                const proximityInput = document.querySelector('#refind-findbar-proximity-value');
                 
                 if (caseCheckbox) caseCheckbox.checked = settings.caseSensitive;
                 if (regexCheckbox) regexCheckbox.checked = settings.useRegex;
@@ -567,16 +567,16 @@
                     proximityInput.disabled = !settings.useProximity;
                 }
                 
-                console.log('[Searchlight] Settings loaded:', settings);
+                console.log('[ReFind] Settings loaded:', settings);
             })
-            .catch(err => console.log('[Searchlight] Could not load settings:', err));
+            .catch(err => console.log('[ReFind] Could not load settings:', err));
     }
 
     function saveSettings() {
         browser.runtime.sendMessage({ action: 'saveSettings', settings })
-            .catch(err => console.log('[Searchlight] Could not save settings:', err));
+            .catch(err => console.log('[ReFind] Could not save settings:', err));
     }
 
 
-    console.log('[Searchlight] Ready');
+    console.log('[ReFind] Ready');
 })();
